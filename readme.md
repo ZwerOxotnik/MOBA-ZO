@@ -42,7 +42,9 @@
 MOBA by ZwerOxotnik
 -------------------
 
-Battle arena with bonuses every round. The losing team of each round gets bonuses and keeps them between rounds.
+PvP/TvT battle arena with bonuses every round against fortress.\
+The losing team of each round gets bonuses and keeps them between rounds.\
+Base respawns after each round with buildings.
 
 <p align="center">
   <a href="https://mods.factorio.com/mod/MOBA-ZO/downloads"><strong>Download the mod&nbsp;&nbsp;▶</strong></a>

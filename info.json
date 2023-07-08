@@ -1,13 +1,13 @@
 {
     "name": "MOBA-ZO",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "factorio_version": "1.1",
-    "title": "MOBA by ZwerOxotnik [scenario-mod]",
+    "title": "MOBАA by ZwerOxotnik [scenario-mod]",
     "author": "ZwerOxotnik",
     "contact": "zweroxotnik@gmail.com, Discord:ZwerOxotnik",
     "source": "https://github.com/ZwerOxotnik/MOBA-ZO",
     "homepage": "https://www.reddit.com/r/ZwerOxotnik/",
-    "description": "Battle arena with bonuses every round. The losing team of each round gets bonuses and keeps them between rounds",
+    "description": "See locale/*",
     "dependencies": [
 			"~ MOBA-ZO",
       "keep-inventory",

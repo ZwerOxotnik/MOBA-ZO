@@ -4,9 +4,6 @@ surface_util = require("__MOBA-ZO__/src/static-lib/lualibs/surface-util")
 ---@type table<string, module>
 local modules = {}
 modules["MOBA-ZO"] = require("__MOBA-ZO__/src/MOBA-ZO")
-modules["MOBA-ZO"].START_PLAYER_ITEMS = require("start_player_items")
-modules["MOBA-ZO"].BONUS_CHOICES = require("bonus_choices")
-modules["MOBA-ZO"].START_TECHS = require("start_techs")
 
 
 local event_handler

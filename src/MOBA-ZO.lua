@@ -29,6 +29,18 @@ local CHECK_BUTTON = {
 	style = "item_and_count_select_confirm",
 	sprite = "utility/check_mark"
 }
+local is_ok, START_PLAYER_ITEMS = pcall(require, "start_player_items")
+if not is_ok then
+	START_PLAYER_ITEMS = require("__MOBA-ZO__/scenarios/MOBA-ZO/start_player_items")
+end
+local is_ok, BONUS_CHOICES = pcall(require, "bonus_choices")
+if not is_ok then
+	BONUS_CHOICES = require("__MOBA-ZO__/scenarios/MOBA-ZO/bonus_choices")
+end
+local is_ok, START_TECHS = pcall(require, "start_techs")
+if not is_ok then
+	START_TECHS = require("__MOBA-ZO__/scenarios/MOBA-ZO/start_techs")
+end
 
 
 --#region Util
@@ -53,7 +65,7 @@ function set_player_spectate(player)
 	player.teleport({0,0}, surface)
 	local character = player.character
 	if character and character.valid then
-		character.destroy({raise_destroy=true})
+		character.destroy(DESTROY_PARAM)
 	end
 
 	player.force = "player"
@@ -71,6 +83,7 @@ function set_team(player, force)
 		return
 	end
 
+	delete_bonus_GUI(player)
 	delete_reserved_player_character(player.index)
 	player.force = force
 	player_util.create_new_character(player)
@@ -437,7 +450,7 @@ function reset_forces_data()
 
 		-- research technologies
 		local technologies = force.technologies
-		for _, tech_name in pairs(M.START_TECHS) do
+		for _, tech_name in pairs(START_TECHS) do
 			local tech = technologies[tech_name]
 			if tech then
 				tech.researched = true
@@ -633,7 +646,7 @@ end
 
 function insert_start_items(player)
 	local item_prototypes = game.item_prototypes
-	for _, item_data in pairs(M.START_PLAYER_ITEMS) do
+	for _, item_data in pairs(START_PLAYER_ITEMS) do
 		if item_prototypes[item_data.name] then
 			player.insert(item_data)
 		else
@@ -1327,7 +1340,7 @@ function update_global_data()
 		local bonuses = mod_data.bonuses
 		local item_prototypes = game.item_prototypes
 		local last_id = 0
-		for _, items in ipairs(M.BONUS_CHOICES) do
+		for _, items in ipairs(BONUS_CHOICES) do
 			for i = 1, #items do
 				local item = items[i]
 				if not item_prototypes[item.name] then
