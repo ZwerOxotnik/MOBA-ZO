@@ -7,7 +7,7 @@
     "contact": "zweroxotnik@gmail.com, Discord:ZwerOxotnik",
     "source": "https://github.com/ZwerOxotnik/MOBA-ZO",
     "homepage": "https://www.reddit.com/r/ZwerOxotnik/",
-    "description": "See locale/*",
+    "description": "See locale/* ",
     "dependencies": [
 			"~ MOBA-ZO",
       "keep-inventory",
