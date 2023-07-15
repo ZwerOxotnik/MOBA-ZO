@@ -1,4 +1,10 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.1.3
+Date: 2023-07-15
+  Changes:
+    - repair-from-vehicle is added as a dependency
+    - Better support with RampantArsenal, Repair_Turret, bobwarfare, stasis_mine (stasis weapons), Krastorio2, shield-projector, laserfence, Additional-Turret-updated, Kombat_Drones, Reinforced-Walls, baron-turrets
+---------------------------------------------------------------------------------------------------
 Version: 0.1.2
 Date: 2023-07-15
   Changes:
