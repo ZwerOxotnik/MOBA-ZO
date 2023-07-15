@@ -450,7 +450,7 @@ function reset_forces_data()
 
 		-- research technologies
 		local technologies = force.technologies
-		for _, tech_name in pairs(START_TECHS) do
+		for _, tech_name in pairs(M.start_techs or START_TECHS) do
 			local tech = technologies[tech_name]
 			if tech then
 				tech.researched = true
@@ -646,7 +646,7 @@ end
 
 function insert_start_items(player)
 	local item_prototypes = game.item_prototypes
-	for _, item_data in pairs(START_PLAYER_ITEMS) do
+	for _, item_data in ipairs(M.start_player_items or START_PLAYER_ITEMS) do
 		if item_prototypes[item_data.name] then
 			player.insert(item_data)
 		else
@@ -1340,7 +1340,7 @@ function update_global_data()
 		local bonuses = mod_data.bonuses
 		local item_prototypes = game.item_prototypes
 		local last_id = 0
-		for _, items in ipairs(BONUS_CHOICES) do
+		for _, items in ipairs(M.bonus_choices or BONUS_CHOICES) do
 			for i = 1, #items do
 				local item = items[i]
 				if not item_prototypes[item.name] then

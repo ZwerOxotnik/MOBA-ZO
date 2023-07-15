@@ -9,9 +9,9 @@ return {
 	"logistic-system",
 	"heavy-armor",
 	"construction-robotics",
-	-- "optics",
-	-- "optics-2", -- From another mod
-	-- "optics-3", -- From another mod
+	"optics",
+	"optics-2", -- From another mod
+	"optics-3", -- From another mod
 	"cclp", -- From Color_Combinator_Lamp_Posts mod
 	"automation",
 	"electronics",
@@ -29,5 +29,29 @@ return {
 	"trainfuel-2", -- From trainConstructionSite mod
 	"rail-signals",
 	"logistic-science-pack",
-	"circuit-network"
+	"circuit-network",
+
+	--- From IndustrialRevolution3
+	"ir-charcoal",
+	"ir-grinding",
+	"ir-grinding-2",
+	"ir-steambot",
+	"ir-bronze-furnace",
+	"ir-bronze-forestry",
+	"ir-iron-forestry",
+	"ir-research-1",
+	"ir-gold-milestone",
+	"ir-iron-milestone",
+	"ir-steel-milestone",
+	"ir-crude-oil-processing",
+	"ir-light-oil-processing",
+	"ir-heavy-oil-processing",
+	"ir-lampbot",
+	"ir-graphite",
+	"ir-silicon",
+	"ir-steam-power",
+	"ir-petro-generator",
+	"ir-electronics-1",
+	"ir-iron-motor",
+	"ir-coking",
 }
