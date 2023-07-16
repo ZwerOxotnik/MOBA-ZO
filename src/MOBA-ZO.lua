@@ -4,6 +4,7 @@ local M = {}
 
 local player_util = require("static-lib/lualibs/LuaPlayer")
 local time_util = require("static-lib/lualibs/time-util")
+local force_util = require("static-lib/lualibs/force-util")
 
 
 --#region Global game data
@@ -449,13 +450,7 @@ function reset_forces_data()
 		force.set_ammo_damage_modifier("flamethrower", -0.9)
 
 		-- research technologies
-		local technologies = force.technologies
-		for _, tech_name in pairs(M.start_techs or START_TECHS) do
-			local tech = technologies[tech_name]
-			if tech then
-				tech.researched = true
-			end
-		end
+		force_util.change_techs_safely(force, M.start_techs or START_TECHS, "researched", true)
 
 		if team_data then
 			force.chart_all(team_data.safe_surface)
