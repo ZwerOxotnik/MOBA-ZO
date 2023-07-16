@@ -93,7 +93,7 @@ if script.active_mods.bobwarfare then
 		{name="reinforced-gate", count = 10}
 	}
 	choices[#choices+1] = {{name="distractor-mine", count = 3}}
-	choices[#choices+1] = {{name="poison-mine", count = 6}}
+	choices[#choices+1] = {{name="poison-mine",   count = 6}}
 	choices[#choices+1] = {{name="slowdown-mine", count = 12}}
 end
 
@@ -102,6 +102,35 @@ if script.active_mods.Kombat_Drones then
 	choices[#choices+1] = {{name="basic-infantry", count = 10}}
 	choices[#choices+1] = {{name="heavy-infantry", count = 10}}
 	choices[#choices+1] = {{name="power-infantry", count = 1}}
+end
+
+if script.active_mods.ArmouredBiters then
+	choices[#choices+1] = {{name="big-armoured-biter", count = 3}}
+end
+
+if script.active_mods.Cold_biters then
+	choices[#choices+1] = {{name="big-cold-biter",   count = 5}}
+	choices[#choices+1] = {{name="big-cold-spitter", count = 5}}
+end
+
+if script.active_mods.Explosive_biters then
+	choices[#choices+1] = {{name="big-explosive-biter",   count = 2}}
+	choices[#choices+1] = {{name="big-explosive-spitter", count = 2}}
+end
+
+if script.active_mods.bobenemies then
+	choices[#choices+1] = {{name="bob-big-piercing-biter", count = 5}}
+	choices[#choices+1] = {{name="bob-huge-acid-biter",    count = 5}}
+	choices[#choices+1] = {{name="bob-huge-acid-spitter",  count = 5}}
+	choices[#choices+1] = {{name="bob-huge-explosive-biter",  count = 2}}
+	choices[#choices+1] = {{name="bob-huge-electric-spitter", count = 4}}
+	choices[#choices+1] = {{name="bob-huge-explosive-spitter", count = 2}}
+	-- choices[#choices+1] = {{name="bob-giant-poison-spitter", count = 1}}
+	-- choices[#choices+1] = {{name="bob-giant-fire-spitter", count = 1}}
+	-- choices[#choices+1] = {{name="bob-giant-acid-biter", count = 1}}
+	-- choices[#choices+1] = {{name="bob-giant-fire-biter", count = 1}}
+	-- choices[#choices+1] = {{name="bob-giant-poison-biter", count = 1}}
+	-- choices[#choices+1] = {{name="bob-giant-explosive-biter", count = 1}}
 end
 
 if script.active_mods["baron-turrets"] then
@@ -144,15 +173,15 @@ end
 if script.active_mods.RampantArsenal then
 	choices[#choices+1] = {{name="incendiary-landmine-rampant-arsenal", count = 6}}
 	choices[#choices+1] = {{name="bio-landmine-rampant-arsenal", count = 3}}
-	choices[#choices+1] = {{name="he-landmine-rampant-arsenal", count = 1}}
+	choices[#choices+1] = {{name="he-landmine-rampant-arsenal",  count = 1}}
 	choices[#choices+1] = {{name="bio-grenade-capsule-rampant-arsenal", count = 1}}
 	choices[#choices+1] = {{name="incendiary-grenade-capsule-rampant-arsenal", count = 1}}
 	choices[#choices+1] = {{name="toxic-capsule-rampant-arsenal", count = 1}}
 	choices[#choices+1] = {{name="paralysis-capsule-rampant-arsenal", count = 1}}
-	choices[#choices+1] = {{name="repair-capsule-rampant-arsenal", count = 2}}
+	choices[#choices+1] = {{name="repair-capsule-rampant-arsenal",  count = 2}}
 	choices[#choices+1] = {{name="healing-capsule-rampant-arsenal", count = 1}}
 	choices[#choices+1] = {{name="speed-capsule-rampant-arsenal", count = 1}}
-	choices[#choices+1] = {{name="mending-wall-rampant-arsenal", count = 100}}
+	choices[#choices+1] = {{name="mending-wall-rampant-arsenal",  count = 100}}
 	choices[#choices+1] = {{name="reinforced-wall-rampant-arsenal", count = 50}}
 	choices[#choices+1] = {{name="shotgun-ammo-turret-rampant-arsenal", count = 4}}
 	choices[#choices+1] = {{name="cannon-ammo-turret-rampant-arsenal",  count = 1}}
