@@ -49,8 +49,8 @@ local choices = {
 	{
 		{name="roboport", count = 1},
 		{name="fast-inserter", count = 20},
-		{name="logistic-chest-requester", count = 50},
-		{name="logistic-chest-storage", count = 10},
+		{name="requester-chest", count = 50},
+		{name="storage-chest", count = 10},
 		{name="logistic-robot", count = 50},
 		{name="construction-robot", count = 100},
 	},

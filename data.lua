@@ -14,7 +14,7 @@ MOBA_ZO_data = {
 			order = "a",
 			place_result = _data.name,
 			stack_size = 10,
-			flags = {"hidden"}
+			hidden = true,
 		}
 		data:extend({item})
 	end,

@@ -2,14 +2,14 @@
 local M = {}
 
 
-local player_util = require("static-lib/lualibs/LuaPlayer")
+local player_util = require("static-lib/lualibs/control_stage/player-util")
+local force_util = require("static-lib/lualibs/control_stage/force-util")
 local time_util = require("static-lib/lualibs/time-util")
-local force_util = require("static-lib/lualibs/force-util")
 
 
---#region Global game data
-local mod_data
-local player_HUD_data
+--#region Storage game data
+local __mod_data
+local __player_HUD_data
 --#endregion
 
 
@@ -48,7 +48,7 @@ end
 
 ---@param player_index uint
 function delete_reserved_player_character(player_index)
-	local  reserved_characters = mod_data.reserved_characters
+	local  reserved_characters = __mod_data.reserved_characters
 	local entity = reserved_characters[player_index]
 	if not entity then return end
 	if entity.valid then
@@ -89,7 +89,7 @@ function set_team(player, force)
 	player.force = force
 	player_util.create_new_character(player)
 
-	if mod_data.is_battle then
+	if __mod_data.is_battle then
 		teleport_to_battle(player)
 	else
 		teleport_to_preparation_zone(player)
@@ -98,7 +98,7 @@ function set_team(player, force)
 
 	if #force.connected_players == 1 then
 		local all_teams_have_players = true
-		for _, team_data in pairs(mod_data.teams) do
+		for _, team_data in pairs(__mod_data.teams) do
 			if #team_data.force.connected_players == 0 then
 				all_teams_have_players = false
 				break
@@ -116,14 +116,14 @@ end
 function teleport_to_preparation_zone(player)
 	local force = player.force
 	local force_name = force.name
-	local team_data = mod_data.teams[force_name]
+	local team_data = __mod_data.teams[force_name]
 	if not team_data then return false end
 
 	local surface = game.get_surface(force_name)
 	player_util.delete_character(player)
 
 	-- Set reserved character
-	local reserved_character = mod_data.reserved_characters[player.index]
+	local reserved_character = __mod_data.reserved_characters[player.index]
 	if reserved_character and reserved_character.valid then
 		player.teleport(reserved_character.position, reserved_character.surface)
 		player.character = reserved_character
@@ -153,7 +153,7 @@ end
 function teleport_to_battle(player)
 	local force = player.force
 	local force_name = force.name
-	local team_data = mod_data.teams[force_name]
+	local team_data = __mod_data.teams[force_name]
 	if not team_data then return false end
 
 	local surface = game.get_surface(1)
@@ -162,7 +162,7 @@ function teleport_to_battle(player)
 		local new_character = character.clone({position=player.position, force=player.force})
 		new_character.active = false
 		if new_character and new_character.valid then
-			mod_data.reserved_characters[player.index] = new_character
+			__mod_data.reserved_characters[player.index] = new_character
 		end
 	end
 
@@ -226,7 +226,7 @@ end
 ---@return boolean
 function use_teleport(entity, player)
 	local force_name = entity.force.name
-	local team_data = mod_data.teams[force_name]
+	local team_data = __mod_data.teams[force_name]
 	local teleport_entities = team_data.teleport_entities
 	local main_teleport = team_data.main_teleport
 
@@ -257,13 +257,13 @@ end
 
 
 function start_round()
-	if mod_data.is_battle then
+	if __mod_data.is_battle then
 		return
 	end
-	mod_data.is_battle = true
-	mod_data.is_preparation_state = false
-	mod_data.end_preparation_tick = nil
-	mod_data.end_round_tick = game.tick + 60 * game.speed * 60 * 10
+	__mod_data.is_battle = true
+	__mod_data.is_preparation_state = false
+	__mod_data.end_preparation_tick = nil
+	__mod_data.end_round_tick = game.tick + 60 * game.speed * 60 * 10
 	for _, player in pairs(game.connected_players) do
 		if player.valid then
 			hide_preparation_HUD(player)
@@ -271,7 +271,7 @@ function start_round()
 		end
 	end
 
-	for _, team_data in ipairs(mod_data.teams) do
+	for _, team_data in ipairs(__mod_data.teams) do
 		for _, player in pairs(team_data.force.connected_players) do
 			delete_bonus_GUI(player)
 		end
@@ -280,20 +280,20 @@ function start_round()
 	local scenario_lobby = game.get_surface("scenario_lobby")
 	local surface = game.get_surface(1)
 	local clone_data = {destination_surface=surface, clone_entities=true, clone_tiles=false}
-	for i = 1, mod_data.count_teams do
-		local team_data = mod_data.teams["team" .. i]
+	for i = 1, __mod_data.count_teams do
+		local team_data = __mod_data.teams["team" .. i]
 		teleport_players(team_data.force, scenario_lobby)
 	end
 
-	for i = 1, mod_data.count_teams do
-		local team_data = mod_data.teams["team" .. i]
+	for i = 1, __mod_data.count_teams do
+		local team_data = __mod_data.teams["team" .. i]
 		clone_data.source_area      = team_data.territory
 		clone_data.destination_area = team_data.territory
 		team_data.safe_surface.clone_area(clone_data)
 
 		local entity = team_data.safe_main_teleport
 		entity = surface.find_entity("rocket-silo", entity.position)
-		mod_data.end_trigger_entities[script.register_on_entity_destroyed(entity)] = i
+		__mod_data.end_trigger_entities[script.register_on_object_destroyed(entity)] = i
 		team_data.force.set_spawn_position(entity.position, surface)
 		team_data.main_teleport = entity
 		entity.destructible = true
@@ -318,8 +318,8 @@ function start_round()
 		entities[i].active = true
 	end
 
-	for i = 1, mod_data.count_teams do
-		local team_data = mod_data.teams["team" .. i]
+	for i = 1, __mod_data.count_teams do
+		local team_data = __mod_data.teams["team" .. i]
 		teleport_force_to_battle(team_data.force)
 	end
 
@@ -328,16 +328,16 @@ end
 
 
 function end_round()
-	if not mod_data.is_battle then return end
-	mod_data.is_battle = false
-	mod_data.is_preparation_state = true
-	mod_data.current_round = mod_data.current_round + 1
-	mod_data.end_round_tick = nil
-	mod_data.end_preparation_tick = game.tick + 60 * game.speed * 60 * 2
+	if not __mod_data.is_battle then return end
+	__mod_data.is_battle = false
+	__mod_data.is_preparation_state = true
+	__mod_data.current_round = __mod_data.current_round + 1
+	__mod_data.end_round_tick = nil
+	__mod_data.end_preparation_tick = game.tick + 60 * game.speed * 60 * 2
 	update_player_wave_HUD()
 
 	local is_valid_amount_of_players = true
-	for _, team_data in ipairs(mod_data.teams) do
+	for _, team_data in ipairs(__mod_data.teams) do
 		if #team_data.force.connected_players == 0 then
 			is_valid_amount_of_players = false
 			break
@@ -355,19 +355,19 @@ function end_round()
 		not_enough_players()
 	end
 
-	for i = 1, mod_data.count_teams do
-		local mod_data = mod_data.teams["team" .. i]
+	for i = 1, __mod_data.count_teams do
+		local mod_data = __mod_data.teams["team" .. i]
 		teleport_force_to_preparation_zone(mod_data.force)
 	end
 
 	local average_player_count = 0
-	for _, team_data in ipairs(mod_data.teams) do
+	for _, team_data in ipairs(__mod_data.teams) do
 		average_player_count = average_player_count + #team_data.force.connected_players
 	end
-	average_player_count = average_player_count / #mod_data.teams
+	average_player_count = average_player_count / #__mod_data.teams
 
 	local loser_team
-	for _, team_data in ipairs(mod_data.teams) do
+	for _, team_data in ipairs(__mod_data.teams) do
 		local main_teleport = team_data.main_teleport
 		if not (main_teleport and main_teleport.valid) then
 			loser_team = team_data.force
@@ -376,7 +376,7 @@ function end_round()
 
 	if not loser_team then
 		local prev_max_count = 0
-		for _, team_data in ipairs(mod_data.teams) do
+		for _, team_data in ipairs(__mod_data.teams) do
 			local destroyed_teleports = 0
 			for _, teleports in ipairs(team_data.teleport_entities) do
 				for _, teleport in ipairs(teleports) do
@@ -408,7 +408,7 @@ function end_round()
 		loser_team.print("Your team got bonuses") -- TODO: add localization
 	else
 		-- give bonus to all teams
-		for _, team_data in ipairs(mod_data.teams) do
+		for _, team_data in ipairs(__mod_data.teams) do
 			local force = team_data.force
 			local multiplier = average_player_count / #force.connected_players
 			local count = math.max(math.floor(3 * multiplier), 1)
@@ -433,14 +433,14 @@ end
 
 function reset_forces_data()
 	for _, force in pairs(game.forces) do
-		local team_data = mod_data.teams[force.name]
+		local team_data = __mod_data.teams[force.name]
 		force.reset()
 		force.reset_evolution() -- is this useful?
 		force.friendly_fire = false
 
 		-- set bonuses
 		force.manual_mining_speed_modifier = 10
-		force.manual_crafting_speed_modifier = mod_data.manual_crafting_speed_modifier
+		force.manual_crafting_speed_modifier = __mod_data.manual_crafting_speed_modifier
 		force.laboratory_speed_modifier = 4
 		force.worker_robots_speed_modifier = 2
 		force.character_item_pickup_distance_bonus = 2
@@ -450,7 +450,7 @@ function reset_forces_data()
 		force.set_ammo_damage_modifier("flamethrower", -0.9)
 
 		-- research technologies
-		force_util.change_techs_safely(force, M.start_techs or START_TECHS, "researched", true)
+		force_util.research_techs_safely(force, M.start_techs or START_TECHS)
 
 		if team_data then
 			force.chart_all(team_data.safe_surface)
@@ -460,7 +460,7 @@ end
 
 
 function not_enough_players()
-	mod_data.end_preparation_tick = nil
+	__mod_data.end_preparation_tick = nil
 	for _, _player in pairs(game.connected_players) do
 		if _player.valid then
 			hide_preparation_HUD(_player)
@@ -476,7 +476,7 @@ end
 function update_teams_table(teams_table, player)
 	teams_table.clear()
 
-	for i=1, mod_data.count_teams do
+	for i=1, __mod_data.count_teams do
 		teams_table.add(LABEL).caption = {"MOBA-ZO-HUD.team" .. i}
 	end
 	teams_table.add(LABEL).caption = {"spectators"}
@@ -567,7 +567,7 @@ function update_bonus_table(bonus_table, choices_count, multiplier)
 	bonus_table.clear()
 
 	local bonuses_for_selection = {}
-	local bonuses = mod_data.bonuses
+	local bonuses = __mod_data.bonuses
 	local deep_frame = {type = "frame", style = "deep_frame_in_shallow_frame", direction = "vertical"}
 	local elem_button = {type = "choose-elem-button", elem_type = "item", item = ""}
 	while true do
@@ -612,35 +612,35 @@ end
 
 
 function check_player_data()
-	for player_index in pairs(mod_data.player_HUD_data) do
+	for player_index in pairs(__mod_data.player_HUD_data) do
 		local player = game.get_player(player_index)
 		if not (player and player.valid and player.connected) then
-			player_HUD_data[player_index] = nil
+			__player_HUD_data[player_index] = nil
 		end
 	end
 
-	for player_index, entity in pairs(mod_data.reserved_characters) do
+	for player_index, entity in pairs(__mod_data.reserved_characters) do
 		local player = game.get_player(player_index)
 		if not (player and player.valid and player.connected and entity and entity.valid) then
 			if entity and entity.valid then
 				entity.destroy(DESTROY_PARAM)
 			end
-			mod_data.reserved_characters[player_index] = nil
+			__mod_data.reserved_characters[player_index] = nil
 		end
 	end
 end
 
 
 function update_player_wave_HUD()
-	local next_round = tostring(mod_data.current_round + 1)
-	for _, HUDs in pairs(player_HUD_data) do
+	local next_round = tostring(__mod_data.current_round + 1)
+	for _, HUDs in pairs(__player_HUD_data) do
 		HUDs[1].caption = next_round
 	end
 end
 
 
 function insert_start_items(player)
-	local item_prototypes = game.item_prototypes
+	local item_prototypes = prototypes.item
 	for _, item_data in ipairs(M.start_player_items or START_PLAYER_ITEMS) do
 		if item_prototypes[item_data.name] then
 			player.insert(item_data)
@@ -715,7 +715,7 @@ function create_preparation_HUD(player)
 	local main_frame = screen.add{type = "frame", name = "MOBA_ZO_preparation_HUD", direction = "horizontal"}
 	main_frame.location = prev_location or {x = 50, y = 50}
 	main_frame.style.padding = 0
-	if mod_data.end_round_tick then
+	if __mod_data.end_round_tick then
 		main_frame.visible = true
 	else
 		main_frame.visible = false
@@ -728,17 +728,17 @@ function create_preparation_HUD(player)
 
 	main_frame.add(LABEL).caption = {"MOBA-ZO-HUD.Round"}
 	local wave_label = main_frame.add(LABEL)
-	wave_label.caption = tostring(mod_data.current_round)
+	wave_label.caption = tostring(__mod_data.current_round)
 	main_frame.add(LABEL).caption = {"MOBA-ZO-HUD.in"}
 	local time_label = main_frame.add(LABEL)
-	if mod_data.end_round_tick then
-		time_label.caption = time_util.ticks_to_game_mm_ss(mod_data.end_round_tick - game.tick)
+	if __mod_data.end_round_tick then
+		time_label.caption = time_util.ticks_to_game_mm_ss(__mod_data.end_round_tick - game.tick)
 	else
 		time_label.caption = "00:00"
 	end
 
-	player_HUD_data[player.index] = player_HUD_data[player.index] or {}
-	local _player_HUD_data = player_HUD_data[player.index]
+	__player_HUD_data[player.index] = __player_HUD_data[player.index] or {}
+	local _player_HUD_data = __player_HUD_data[player.index]
 	_player_HUD_data[1] = wave_label
 	_player_HUD_data[2] = time_label
 end
@@ -768,7 +768,7 @@ function create_round_HUD(player)
 	local main_frame = screen.add{type = "frame", name = "MOBA_ZO_round_HUD", direction = "horizontal"}
 	main_frame.location = prev_location or {x = 70, y = 50}
 	main_frame.style.padding = 0
-	if mod_data.end_preparation_tick then
+	if __mod_data.end_preparation_tick then
 		main_frame.visible = true
 	else
 		main_frame.visible = false
@@ -781,14 +781,14 @@ function create_round_HUD(player)
 
 	main_frame.add(LABEL).caption = {"", {"time_left"}, {"colon"}}
 	local time_label = main_frame.add(LABEL)
-	if mod_data.end_preparation_tick then
-		time_label.caption = time_util.ticks_to_game_mm_ss(mod_data.end_preparation_tick - game.tick)
+	if __mod_data.end_preparation_tick then
+		time_label.caption = time_util.ticks_to_game_mm_ss(__mod_data.end_preparation_tick - game.tick)
 	else
 		time_label.caption = "00:00"
 	end
 
-	player_HUD_data[player.index] = player_HUD_data[player.index] or {}
-	local _player_HUD_data = player_HUD_data[player.index]
+	__player_HUD_data[player.index] = __player_HUD_data[player.index] or {}
+	local _player_HUD_data = __player_HUD_data[player.index]
 	_player_HUD_data[3] = time_label
 end
 
@@ -817,7 +817,7 @@ end
 function give_bonus(player, bonus_id, multiplier)
 	local bonus
 	if bonus_id then
-		local bonuses = mod_data.bonuses
+		local bonuses = __mod_data.bonuses
 		for i=1, #bonuses do
 			local _bonus = bonuses[i]
 			if _bonus.id == bonus_id then
@@ -830,7 +830,7 @@ function give_bonus(player, bonus_id, multiplier)
 			return false
 		end
 	else
-		bonus = mod_data.bonuses[math.random(1, #mod_data.bonuses)]
+		bonus = __mod_data.bonuses[math.random(1, #__mod_data.bonuses)]
 	end
 
 
@@ -880,7 +880,7 @@ function create_pick_team_GUI(player)
 	top_flow.add{
 		hovered_sprite = "utility/close_black",
 		clicked_sprite = "utility/close_black",
-		sprite = "utility/close_white",
+		sprite = "utility/close",
 		style = "frame_action_button",
 		type = "sprite-button",
 		name = "MOBA_ZO_close"
@@ -971,7 +971,7 @@ local function create_lobby_settings_GUI(player)
 	local textfield_content = main_frame.add{type = "table", name = "MOBA_ZO_textfield_content", column_count = 2}
 
 	textfield_content.add(LABEL).caption = {'', "Manual crafting speed modifier", COLON} -- TODO: FIX locale
-	textfield_content.add{type = "textfield", name = "MOBA_ZO_manual_crafting_speed_modifier_textfield", text = mod_data.manual_crafting_speed_modifier or 5, numeric = true, allow_decimal = true, allow_negative = false}.style.maximal_width = 70
+	textfield_content.add{type = "textfield", name = "MOBA_ZO_manual_crafting_speed_modifier_textfield", text = __mod_data.manual_crafting_speed_modifier or 5, numeric = true, allow_decimal = true, allow_negative = false}.style.maximal_width = 70
 
 	local content3 = main_frame.add{type = "table", name = "MOBA_ZO_content3", column_count = 3}
 
@@ -1005,10 +1005,10 @@ local function on_player_left_game(event)
 	local player = game.get_player(player_index)
 	if not (player and player.valid) then return end
 
-	mod_data.player_HUD_data[player_index] = nil
+	__mod_data.player_HUD_data[player_index] = nil
 
-	local team_data = mod_data.teams[player.force.name]
-	if team_data and #player.force.connected_players == 0 and mod_data.is_preparation_state then
+	local team_data = __mod_data.teams[player.force.name]
+	if team_data and #player.force.connected_players == 0 and __mod_data.is_preparation_state then
 		not_enough_players()
 	end
 
@@ -1038,12 +1038,12 @@ end
 
 local function on_player_removed(event)
 	local player_index = event.player_index
-	player_HUD_data[player_index] = nil
+	__player_HUD_data[player_index] = nil
 	delete_reserved_player_character(player_index)
 end
 
 local function on_built_entity(event)
-	local entity = event.created_entity or event.entity
+	local entity = event.entity or event.entity
 	if not entity.valid then return end
 	local surface = entity.surface
 	if surface.index == 1 then return end
@@ -1054,8 +1054,8 @@ end
 local function on_game_created_from_scenario()
 	local surface = game.get_surface(1)
 
-	mod_data.last_round_tick = game.tick
-	mod_data.generate_new_round = false
+	__mod_data.last_round_tick = game.tick
+	__mod_data.generate_new_round = false
 
 	reset_forces_data()
 
@@ -1066,7 +1066,7 @@ local function on_game_created_from_scenario()
 		end
 	end
 
-	for i, team_data in ipairs(mod_data.teams) do
+	for i, team_data in ipairs(__mod_data.teams) do
 		if team_data.safe_main_teleport == nil then
 			local entity
 			entity = game.get_entity_by_tag("R1-" .. i)
@@ -1110,13 +1110,13 @@ local function on_game_created_from_scenario()
 		end
 	end
 
-	mod_data.is_new_map_changes = false
+	__mod_data.is_new_map_changes = false
 end
 
 
-local function on_entity_destroyed(event)
-	if not mod_data.is_battle then return end
-	if not mod_data.end_trigger_entities[event.registration_number] then
+local function on_object_destroyed(event)
+	if not __mod_data.is_battle then return end
+	if not __mod_data.end_trigger_entities[event.registration_number] then
 		return
 	end
 
@@ -1140,7 +1140,7 @@ local GUIS = {
 			elseif manual_crafting_speed_modifier > 1000 then
 				manual_crafting_speed_modifier = 1000
 			end
-			mod_data.manual_crafting_speed_modifier = manual_crafting_speed_modifier
+			__mod_data.manual_crafting_speed_modifier = manual_crafting_speed_modifier
 			for _, force in pairs(game.forces) do
 				force.manual_crafting_speed_modifier = manual_crafting_speed_modifier
 			end
@@ -1249,13 +1249,13 @@ end)
 
 
 function check_timers()
-	local end_round_tick = mod_data.end_round_tick
-	local end_preparation_tick = mod_data.end_preparation_tick
+	local end_round_tick = __mod_data.end_round_tick
+	local end_preparation_tick = __mod_data.end_preparation_tick
 	if end_round_tick then
 		local ticks = end_round_tick - game.tick
 		local time = time_util.ticks_to_game_mm_ss(ticks)
 
-		for _, HUDs in pairs(player_HUD_data) do
+		for _, HUDs in pairs(__player_HUD_data) do
 			HUDs[3].caption = time
 		end
 
@@ -1265,7 +1265,7 @@ function check_timers()
 	elseif end_preparation_tick then
 		local ticks = end_preparation_tick - game.tick
 		local time = time_util.ticks_to_game_mm_ss(ticks)
-		for _, HUDs in pairs(player_HUD_data) do
+		for _, HUDs in pairs(__player_HUD_data) do
 			HUDs[2].caption = time
 		end
 
@@ -1284,8 +1284,8 @@ end
 
 
 function link_data()
-	mod_data = global.MOBA_ZO
-	player_HUD_data = mod_data.player_HUD_data
+	__mod_data = storage.MOBA_ZO
+	__player_HUD_data = __mod_data.player_HUD_data
 end
 
 
@@ -1293,30 +1293,30 @@ function update_global_data()
 	local surface = game.get_surface(1)
 	surface.generate_with_lab_tiles = true
 
-	global.MOBA_ZO = global.MOBA_ZO or {}
-	mod_data = global.MOBA_ZO
-	mod_data.current_round = mod_data.current_round or 0
-	mod_data.count_teams = mod_data.count_teams or 2
-	mod_data.is_battle = mod_data.is_battle or false
-	mod_data.is_preparation_state = mod_data.is_preparation_state or false
-	mod_data.end_round_tick = mod_data.end_round_tick
-	mod_data.tech_price_multiplier = mod_data.tech_price_multiplier or 1
-	mod_data.manual_crafting_speed_modifier = mod_data.manual_crafting_speed_modifier or 5
-	mod_data.generate_new_round = mod_data.generate_new_round or false
-	mod_data.is_new_map_changes = mod_data.is_new_map_changes or true
-	mod_data.player_HUD_data = mod_data.player_HUD_data or {}
-	mod_data.last_round_tick = mod_data.last_round_tick or game.tick
-	mod_data.generate_new_round_tick = mod_data.generate_new_round_tick
+	storage.MOBA_ZO = storage.MOBA_ZO or {}
+	__mod_data = storage.MOBA_ZO
+	__mod_data.current_round = __mod_data.current_round or 0
+	__mod_data.count_teams = __mod_data.count_teams or 2
+	__mod_data.is_battle = __mod_data.is_battle or false
+	__mod_data.is_preparation_state = __mod_data.is_preparation_state or false
+	__mod_data.end_round_tick = __mod_data.end_round_tick
+	__mod_data.tech_price_multiplier = __mod_data.tech_price_multiplier or 1
+	__mod_data.manual_crafting_speed_modifier = __mod_data.manual_crafting_speed_modifier or 5
+	__mod_data.generate_new_round = __mod_data.generate_new_round or false
+	__mod_data.is_new_map_changes = __mod_data.is_new_map_changes or true
+	__mod_data.player_HUD_data = __mod_data.player_HUD_data or {}
+	__mod_data.last_round_tick = __mod_data.last_round_tick or game.tick
+	__mod_data.generate_new_round_tick = __mod_data.generate_new_round_tick
 	---@type table<uint, LuaEntity>
-	mod_data.reserved_characters = mod_data.reserved_characters or {}
+	__mod_data.reserved_characters = __mod_data.reserved_characters or {}
 	---@type table<uint64, LuaEntity>
-	mod_data.end_trigger_entities = mod_data.end_trigger_entities or {}
+	__mod_data.end_trigger_entities = __mod_data.end_trigger_entities or {}
 
 	if game then
-		if mod_data.teams == nil then
-			mod_data.teams = mod_data.teams or {}
-			for i=1, mod_data.count_teams do
-				mod_data.teams[i] = {
+		if __mod_data.teams == nil then
+			__mod_data.teams = __mod_data.teams or {}
+			for i=1, __mod_data.count_teams do
+				__mod_data.teams[i] = {
 					territory = nil,
 					safe_surface = game.surfaces["team" .. i],
 					main_teleport = nil,
@@ -1325,15 +1325,15 @@ function update_global_data()
 					safe_teleport_entities = {{nil, nil}, {nil, nil}},
 					force = game.forces["team" .. i],
 				}
-				mod_data.teams["team" .. i] = mod_data.teams[i]
+				__mod_data.teams["team" .. i] = __mod_data.teams[i]
 			end
-			mod_data.teams[1].territory = {{x = -1000, y = -100}, right_bottom = {x = 0, y = 700}}
-			mod_data.teams[2].territory = {{x = 0, y = -100}, right_bottom = {x = 1000, y = 700}}
+			__mod_data.teams[1].territory = {{x = -1000, y = -100}, right_bottom = {x = 0, y = 700}}
+			__mod_data.teams[2].territory = {{x = 0, y = -100}, right_bottom = {x = 1000, y = 700}}
 		end
 
-		mod_data.bonuses = {}
-		local bonuses = mod_data.bonuses
-		local item_prototypes = game.item_prototypes
+		__mod_data.bonuses = {}
+		local bonuses = __mod_data.bonuses
+		local item_prototypes = prototypes.item
 		local last_id = 0
 		for _, items in ipairs(M.bonus_choices or BONUS_CHOICES) do
 			for i = 1, #items do
@@ -1388,7 +1388,7 @@ M.events = {
 	[defines.events.on_robot_built_entity] = on_built_entity,
 	[defines.events.script_raised_built] = on_built_entity,
 	[defines.events.on_gui_click] = on_gui_click,
-	[defines.events.on_entity_destroyed] = on_entity_destroyed,
+	[defines.events.on_object_destroyed] = on_object_destroyed,
 }
 M.on_nth_tick = {
 	[60] = check_timers

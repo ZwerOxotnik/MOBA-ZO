@@ -9,9 +9,9 @@ local techs = {
 	"logistic-system",
 	"heavy-armor",
 	"construction-robotics",
-	"optics",
-	"optics-2", -- From another mod
-	"optics-3", -- From another mod
+	"lamp",
+	"lamp-2", -- From another mod
+	"lamp-3", -- From another mod
 	"cclp", -- From Color_Combinator_Lamp_Posts mod
 	"automation",
 	"electronics",

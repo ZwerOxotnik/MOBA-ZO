@@ -1,4 +1,4 @@
-surface_util = require("__MOBA-ZO__/src/static-lib/lualibs/surface-util")
+surface_util = require("__MOBA-ZO__/src/static-lib/lualibs/control_stage/surface-util")
 
 
 ---@type table<string, module>
